@@ -27,8 +27,8 @@
     "wait-on": "^9.1.0"
   },
   "build": {
-    "appId": "com.beitalsidr.ordering",
-    "productName": "Beit Al Sidr Ordering",
+    "appId": "com.leaf.ordering",
+    "productName": "Leaf Ordering",
     "directories": {
       "output": "release"
     },
@@ -43,7 +43,7 @@
       "icon": "public/icons/icon-512.png"
     },
     "portable": {
-      "artifactName": "BeitAlSidrOrdering-${version}-portable.exe"
+      "artifactName": "Leaf-${version}-portable.exe"
     }
   }
 }

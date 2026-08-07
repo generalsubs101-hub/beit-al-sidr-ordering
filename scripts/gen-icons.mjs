@@ -2,9 +2,9 @@ import zlib from "node:zlib";
 import fs from "node:fs";
 import path from "node:path";
 
-const INK = [0x12, 0x40, 0x3b];
-const BRASS = [0xc9, 0x8f, 0x2b];
-const PAPER = [0xed, 0xef, 0xe6];
+const INK = [0x0a, 0x4a, 0x2a];
+const LIGHT = [0xd8, 0xa8, 0x3f]; // brass/gold — lit facet of the twist
+const DARK = [0x6f, 0x7a, 0x38]; // olive — shadow facet of the twist
 
 function crc32(buf) {
   let c;
@@ -31,15 +31,59 @@ function chunk(type, data) {
   return Buffer.concat([len, typeData, crc]);
 }
 
-// point-in-polygon test for a 5-point star
-function starPath(cx, cy, outerR, innerR, rot = -Math.PI / 2) {
-  const pts = [];
-  for (let i = 0; i < 10; i++) {
-    const r = i % 2 === 0 ? outerR : innerR;
-    const a = rot + (i * Math.PI) / 5;
-    pts.push([cx + r * Math.cos(a), cy + r * Math.sin(a)]);
+// mirrors the inline <Thyme/> SVG (viewBox 0 0 24 24): a single tapered blade
+// following an S-curved spine, split into bands at the true twist fold-lines
+// and shaded alternately light/dark so it reads as a leaf twisting in 3D
+const TWISTS = 1.15;
+const AMP = 2.6;
+const MAXW = 6.4;
+const PHASE = -0.35;
+
+function centerline(s) {
+  return [12 + AMP * Math.sin(s * TWISTS * Math.PI * 2 + PHASE), 22 - 20 * s];
+}
+function widthAt(s) {
+  return MAXW * Math.sin(Math.PI * s);
+}
+function deriv(s, h = 0.001) {
+  const [x0, y0] = centerline(Math.max(0, s - h));
+  const [x1, y1] = centerline(Math.min(1, s + h));
+  return [x1 - x0, y1 - y0];
+}
+function normal(s) {
+  const [dx, dy] = deriv(s);
+  const len = Math.hypot(dx, dy) || 1;
+  return [-dy / len, dx / len];
+}
+function edgePoint(s, side) {
+  const [cx, cy] = centerline(s);
+  const [nx, ny] = normal(s);
+  const w = widthAt(s) / 2;
+  return [cx + nx * w * side, cy + ny * w * side];
+}
+function twistSign(s) {
+  return Math.sin(s * TWISTS * Math.PI * 2 + PHASE) >= 0 ? 1 : -1;
+}
+
+const boundaries = [0];
+for (let k = -4; k <= 8; k++) {
+  const s = (k * Math.PI - PHASE) / (TWISTS * Math.PI * 2);
+  if (s > 1e-6 && s < 1 - 1e-6) boundaries.push(s);
+}
+boundaries.push(1);
+boundaries.sort((a, b) => a - b);
+
+const SUB = 14;
+const BANDS = [];
+for (let i = 0; i < boundaries.length - 1; i++) {
+  const s0 = boundaries[i], s1 = boundaries[i + 1];
+  const left = [], right = [];
+  for (let k = 0; k <= SUB; k++) {
+    const s = s0 + (s1 - s0) * (k / SUB);
+    left.push(edgePoint(s, 1));
+    right.push(edgePoint(s, -1));
   }
-  return pts;
+  BANDS.push({ poly: [...left, ...right.reverse()], sign: twistSign((s0 + s1) / 2) });
 }
 
 function pointInPoly(px, py, poly) {
@@ -53,14 +97,21 @@ function pointInPoly(px, py, poly) {
   return inside;
 }
 
+function thymeColor(designX, designY) {
+  for (const b of BANDS) {
+    if (pointInPoly(designX, designY, b.poly)) return b.sign > 0 ? LIGHT : DARK;
+  }
+  return null;
+}
+
 function makePng(size, { maskable = false } = {}) {
   const buf = Buffer.alloc(size * size * 4);
   const cx = size / 2, cy = size / 2;
-  // maskable icons need safe-zone padding (~20%) so the star isn't clipped when masked
-  const outerR = size * (maskable ? 0.30 : 0.34);
-  const innerR = outerR * 0.42;
-  const star = starPath(cx, cy, outerR, innerR);
   const circleR = size * (maskable ? 0.44 : 0.47);
+  const artSize = circleR * 2 * 0.8; // 24x24 design box mapped into this span
+  const scale = artSize / 24;
+  const originX = cx - artSize / 2;
+  const originY = cy - artSize / 2;
 
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
@@ -70,10 +121,10 @@ function makePng(size, { maskable = false } = {}) {
       let color;
       if (!inCircle) {
         color = maskable ? INK : null; // null = transparent
-      } else if (pointInPoly(x + 0.5, y + 0.5, star)) {
-        color = BRASS;
       } else {
-        color = INK;
+        const designX = (x + 0.5 - originX) / scale;
+        const designY = (y + 0.5 - originY) / scale;
+        color = thymeColor(designX, designY) || INK;
       }
       if (color) {
         buf[i] = color[0]; buf[i + 1] = color[1]; buf[i + 2] = color[2]; buf[i + 3] = 255;

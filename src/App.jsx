@@ -293,7 +293,6 @@ const UNAVAILABLE = ["sayadieh"]; // 86'd by the kitchen today
 const T = {
   en: {
     dir: "ltr", table: "Table", seats: "seats", open: "Kitchen open",
-    tagline: "Levantine kitchen · Rainbow Street, Amman",
     callWaiter: "Call waiter", requestBill: "Request bill",
     askChef: "Ask the chef", chefSub: "Allergies, swaps, portion questions",
     yourOrder: "Your order", empty: "Nothing here yet",
@@ -307,27 +306,28 @@ const T = {
     inCart: "in your order", editing: "Editing an item already in your order",
     required: "Choose one", optional: "Optional",
     placed: "Sent to the kitchen", editWindow: "You can still change this order",
+    allGood: "All good?",
     editOrder: "Edit order", cancelOrder: "Cancel order", locked: "Kitchen has started cooking",
     lockedHint: "Ask a waiter if you need a change now.",
     round: "Round", addMore: "Send additions", viewBill: "View bill", back: "Back to menu",
-    bill: "Your bill", billFor: "Table 12 · Beit Al Sidr", tip: "Tip",
+    bill: "Your bill", billFor: "Table 12 · Leaf", tip: "Tip",
     payNow: "Pay now", payMethod: "How would you like to pay?",
     processing: "Processing payment…", paid: "Paid", thanks: "Thank you",
     thanksSub: "Your receipt is below. Show it to staff on the way out.",
     invoice: "Invoice", newOrder: "Start a new order",
     status: { received: "Received", preparing: "Preparing", ready: "Ready", served: "Served" },
     chatPh: "I'm allergic to sesame — what can I eat?",
-    chatIntro: "I'm the kitchen assistant at Beit Al Sidr. Ask me about allergens, spice levels, or whether the chef can make a change to a dish.",
+    chatIntro: "I'm the kitchen assistant at Leaf. Ask me about allergens, spice levels, or whether the chef can make a change to a dish.",
     suggested: "Suggested for you", thinking: "Checking with the kitchen…",
     calling: "A waiter is on the way", billCalled: "A waiter will bring the card machine",
-    cartCleared: "Cart cleared", cancelled: "Order cancelled",
+    cashNote: "Noted — the waiter will pass by to collect payment",
+    cartCleared: "Cart cleared", cancelled: "Order cancelled", confirmed: "Order confirmed with the kitchen",
     vegan: "Vegan", vegetarian: "Vegetarian", spicy: "Spicy", popular: "Most ordered",
     chef: "Chef's pick", national: "National dish", sharing: "For sharing", breakfast: "Breakfast",
     contains: "Contains", perItem: "Prep",
   },
   ar: {
     dir: "rtl", table: "طاولة", seats: "مقاعد", open: "المطبخ يعمل",
-    tagline: "مطبخ شامي · شارع الرينبو، عمّان",
     callWaiter: "نادي النادل", requestBill: "اطلب الفاتورة",
     askChef: "اسأل الشيف", chefSub: "الحساسية، التعديلات، أسئلة الكميات",
     yourOrder: "طلبك", empty: "ما في شي بعد",
@@ -341,20 +341,22 @@ const T = {
     inCart: "في طلبك", editing: "تعديل صنف موجود في طلبك",
     required: "اختر واحداً", optional: "اختياري",
     placed: "وصل للمطبخ", editWindow: "لسا فيك تعدّل الطلب",
+    allGood: "كلّه تمام؟",
     editOrder: "عدّل الطلب", cancelOrder: "ألغِ الطلب", locked: "المطبخ بدأ التحضير",
     lockedHint: "احكِ مع النادل إذا بدك تعديل هلأ.",
     round: "دفعة", addMore: "أرسل الإضافات", viewBill: "اعرض الفاتورة", back: "رجوع للمنيو",
-    bill: "فاتورتك", billFor: "طاولة ١٢ · بيت السدر", tip: "إكرامية",
+    bill: "فاتورتك", billFor: "طاولة ١٢ · ورقة", tip: "إكرامية",
     payNow: "ادفع الآن", payMethod: "كيف بتحب تدفع؟",
     processing: "جاري تنفيذ الدفع…", paid: "مدفوعة", thanks: "شكراً لك",
     thanksSub: "هاي فاتورتك. اعرضها على الموظف عند الخروج.",
     invoice: "فاتورة", newOrder: "ابدأ طلباً جديداً",
     status: { received: "تم الاستلام", preparing: "قيد التحضير", ready: "جاهز", served: "تم التقديم" },
     chatPh: "عندي حساسية من السمسم — شو بقدر آكل؟",
-    chatIntro: "أنا مساعد المطبخ في بيت السدر. اسألني عن مسببات الحساسية، درجة الحرارة، أو إذا كان الشيف يقدر يعدّل صحن معيّن.",
+    chatIntro: "أنا مساعد المطبخ في ورقة. اسألني عن مسببات الحساسية، درجة الحرارة، أو إذا كان الشيف يقدر يعدّل صحن معيّن.",
     suggested: "مقترح إلك", thinking: "بستشير المطبخ…",
     calling: "النادل بالطريق", billCalled: "النادل رح يجيب جهاز الدفع",
-    cartCleared: "تم إفراغ السلة", cancelled: "تم إلغاء الطلب",
+    cashNote: "تمام — النادل رح يمرّ عليك لتحصيل الدفع",
+    cartCleared: "تم إفراغ السلة", cancelled: "تم إلغاء الطلب", confirmed: "تم تأكيد الطلب مع المطبخ",
     vegan: "نباتي صرف", vegetarian: "نباتي", spicy: "حار", popular: "الأكثر طلباً",
     chef: "اختيار الشيف", national: "الطبق الوطني", sharing: "للمشاركة", breakfast: "فطور",
     contains: "يحتوي", perItem: "التحضير",
@@ -365,6 +367,19 @@ const T = {
 
 const jd = (n) => n.toFixed(2);
 const uid = () => Math.random().toString(36).slice(2, 10);
+
+function selEqual(a, b) {
+  const keys = new Set([...Object.keys(a || {}), ...Object.keys(b || {})]);
+  for (const k of keys) {
+    const av = (a || {})[k], bv = (b || {})[k];
+    if (Array.isArray(av) || Array.isArray(bv)) {
+      const as = [...(av || [])].sort();
+      const bs = [...(bv || [])].sort();
+      if (as.length !== bs.length || as.some((v, i) => v !== bs[i])) return false;
+    } else if (av !== bv) return false;
+  }
+  return true;
+}
 
 function linePrice(item, sel) {
   let p = item.price;
@@ -389,6 +404,12 @@ function defaultSel(item) {
   return s;
 }
 
+/* single-choice groups always have a valid default (first option); a required
+ * multi-choice group has no sensible default, so it forces the customize sheet */
+function needsCustomization(item) {
+  return item.groups.some((g) => g.required && g.type === "multi");
+}
+
 function selLabel(item, sel, lang) {
   const parts = [];
   item.groups.forEach((g) => {
@@ -397,8 +418,7 @@ function selLabel(item, sel, lang) {
     const ids = Array.isArray(chosen) ? chosen : [chosen];
     ids.forEach((oid) => {
       const o = g.options.find((x) => x.id === oid);
-      if (o && !(g.type === "single" && g.options[0].id === oid && o.price === 0))
-        parts.push(lang === "ar" ? o.nameAr : o.name);
+      if (o) parts.push(lang === "ar" ? o.nameAr : o.name);
     });
   });
   return parts;
@@ -406,13 +426,12 @@ function selLabel(item, sel, lang) {
 
 /* ----------------------------- ornaments ----------------------------- */
 
-function Star({ size = 14, color = "currentColor", style }) {
+function Thyme({ size = 17, color = "currentColor", style }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" style={style} aria-hidden="true">
       <path
         fill={color}
-        d="M12 0.8l2.9 5.4 5.9-1.9-1.9 5.9 5.4 2.9-5.4 2.9 1.9 5.9-5.9-1.9L12 26.4 9.1 21l-5.9 1.9 1.9-5.9L-0.3 14l5.4-2.9L3.2 5.2l5.9 1.9z"
-        transform="scale(0.92) translate(1 -0.5)"
+        d="M11.11 22L11.64 21.73L12.18 21.45L12.72 21.18L13.26 20.89L13.8 20.59L14.32 20.26L14.83 19.91L15.32 19.51L15.78 19.05L16.2 18.52L16.56 17.92L16.83 17.24L17 16.5L17.06 15.73L16.99 14.96L16.83 14.22L16.59 13.51L16.29 12.86L15.95 12.25L15.58 11.69L15.19 11.17L14.8 10.68L14.4 10.23L14.03 9.82L13.67 9.44L13.34 9.1L13.05 8.81L12.81 8.55L12.6 8.35L12.44 8.2L12.3 8.11L12.18 8.05L12.06 8.01L11.94 7.97L11.82 7.87L11.71 7.71L11.65 7.46L11.63 7.14L11.67 6.75L11.78 6.31L11.93 5.83L12.12 5.32L12.34 4.78L12.58 4.23L12.82 3.68L13.06 3.11L13.27 2.55L13.45 2L12.95 2.28L12.44 2.55L11.91 2.82L11.37 3.1L10.83 3.38L10.29 3.68L9.76 4.01L9.24 4.36L8.73 4.75L8.25 5.2L7.81 5.71L7.41 6.29L7.09 6.96L6.87 7.7L6.76 8.49L6.78 9.28L6.9 10.06L7.12 10.8L7.41 11.48L7.75 12.11L8.13 12.69L8.53 13.23L8.93 13.73L9.35 14.18L9.75 14.6L10.14 14.99L10.5 15.33L10.83 15.64L11.12 15.91L11.37 16.14L11.58 16.32L11.76 16.45L11.91 16.54L12.05 16.6L12.19 16.66L12.33 16.76L12.46 16.91L12.56 17.14L12.61 17.45L12.6 17.83L12.53 18.26L12.41 18.74L12.24 19.24L12.04 19.78L11.81 20.32L11.57 20.88L11.33 21.44Z"
       />
     </svg>
   );
@@ -489,10 +508,17 @@ export default function App() {
   /* ------------------------------ cart ops ------------------------------ */
 
   const addToCart = (item, sel, qty, note) => {
-    setCart((c) => [
-      ...c,
-      { lineId: uid(), itemId: item.id, sel, qty, note, unit: linePrice(item, sel) },
-    ]);
+    setCart((c) => {
+      const idx = c.findIndex(
+        (l) => l.itemId === item.id && (l.note || "") === (note || "") && selEqual(l.sel, sel)
+      );
+      if (idx >= 0) {
+        const next = [...c];
+        next[idx] = { ...next[idx], qty: next[idx].qty + qty };
+        return next;
+      }
+      return [...c, { lineId: uid(), itemId: item.id, sel, qty, note, unit: linePrice(item, sel) }];
+    });
     setToast({ kind: "ok", msg: (isAr ? item.nameAr : item.name) + " ✓" });
   };
 
@@ -549,6 +575,13 @@ export default function App() {
     setRounds((r) => r.slice(0, -1));
     setToast({ kind: "warn", msg: t.cancelled });
   };
+  const confirmLast = () => {
+    if (!lastRound) return;
+    setRounds((r) =>
+      r.map((round, i) => (i === r.length - 1 ? { ...round, at: Date.now() - EDIT_WINDOW_SEC * 1000 } : round))
+    );
+    setToast({ kind: "ok", msg: t.confirmed });
+  };
 
   const roundStatus = (r) => {
     const age = (now - r.at) / 1000;
@@ -569,6 +602,10 @@ export default function App() {
 
   const pay = () => {
     if (!payMethod) return;
+    if (payMethod === "cash") {
+      setToast({ kind: "ok", msg: t.cashNote });
+      return;
+    }
     setPaying(true);
     setTimeout(() => {
       setPaying(false);
@@ -628,7 +665,7 @@ export default function App() {
               {CATEGORIES.map((c) => (
                 <div key={c.id} ref={(n) => (catRefs.current[c.id] = n)} className="cat">
                   <div className="cat-head">
-                    <Star size={11} color="var(--sumac)" />
+                    <Thyme size={11} color="var(--sumac)" />
                     <h2>{isAr ? c.nameAr : c.name}</h2>
                     <span className="rule" />
                     <span className="cat-alt">{isAr ? c.name : c.nameAr}</span>
@@ -640,13 +677,17 @@ export default function App() {
                         count={counts[m.id] || 0}
                         out={UNAVAILABLE.includes(m.id)}
                         onPick={() => setSheet({ item: m })}
+                        onQuickAdd={() => {
+                          if (needsCustomization(m)) setSheet({ item: m });
+                          else addToCart(m, defaultSel(m), 1, "");
+                        }}
                       />
                     ))}
                   </div>
                 </div>
               ))}
               <footer className="foot">
-                <Star size={10} color="var(--brass)" />
+                <Thyme size={10} color="var(--brass)" />
                 <p>
                   {isAr
                     ? "الأسعار بالدينار الأردني وتشمل الخدمة والضريبة عند الدفع. المطبخ يتعامل مع المكسرات والسمسم."
@@ -662,7 +703,7 @@ export default function App() {
                 onSubmit={submit}
                 rounds={rounds} roundStatus={roundStatus}
                 canEdit={canEdit} editLeft={editLeft}
-                onEdit={editLast} onCancel={cancelLast}
+                onEdit={editLast} onCancel={cancelLast} onConfirm={confirmLast}
                 onBill={() => { setView("bill"); setMobileCart(false); window.scrollTo({ top: 0 }); }}
                 onClose={() => setMobileCart(false)}
               />
@@ -697,7 +738,7 @@ export default function App() {
       )}
 
       <button className="chef-fab" onClick={() => setChatOpen(true)} aria-label={t.askChef}>
-        <Star size={13} color="var(--paper)" />
+        <Thyme size={13} color="var(--paper)" />
         <span>{t.askChef}</span>
       </button>
 
@@ -732,12 +773,17 @@ export default function App() {
 function Header({ t, lang, setLang, isAr, onCall, onBill, showBill }) {
   return (
     <header className="hdr">
+      <svg className="hdr-leaf hdr-leaf-start" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M11.11 22L11.64 21.73L12.18 21.45L12.72 21.18L13.26 20.89L13.8 20.59L14.32 20.26L14.83 19.91L15.32 19.51L15.78 19.05L16.2 18.52L16.56 17.92L16.83 17.24L17 16.5L17.06 15.73L16.99 14.96L16.83 14.22L16.59 13.51L16.29 12.86L15.95 12.25L15.58 11.69L15.19 11.17L14.8 10.68L14.4 10.23L14.03 9.82L13.67 9.44L13.34 9.1L13.05 8.81L12.81 8.55L12.6 8.35L12.44 8.2L12.3 8.11L12.06 8.01L11.94 7.97L11.82 7.87L11.71 7.71L11.65 7.46L11.63 7.14L11.67 6.75L11.78 6.31L11.93 5.83L12.12 5.32L12.34 4.78L12.58 4.23L12.82 3.68L13.06 3.11L13.27 2.55L13.45 2L12.95 2.28L12.44 2.55L11.91 2.82L11.37 3.1L10.83 3.38L10.29 3.68L9.76 4.01L9.24 4.36L8.73 4.75L8.25 5.2L7.81 5.71L7.41 6.29L7.09 6.96L6.87 7.7L6.76 8.49L6.78 9.28L6.9 10.06L7.12 10.8L7.41 11.48L7.75 12.11L8.13 12.69L8.53 13.23L8.93 13.73L9.35 14.18L9.75 14.6L10.14 14.99L10.5 15.33L10.83 15.64L11.12 15.91L11.37 16.14L11.58 16.32L11.76 16.45L11.91 16.54L12.05 16.6L12.19 16.66L12.33 16.76L12.46 16.91L12.56 17.14L12.61 17.45L12.6 17.83L12.53 18.26L12.41 18.74L12.24 19.24L12.04 19.78L11.81 20.32L11.57 20.88L11.33 21.44Z" />
+      </svg>
+      <svg className="hdr-leaf hdr-leaf-end" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M11.11 22L11.64 21.73L12.18 21.45L12.72 21.18L13.26 20.89L13.8 20.59L14.32 20.26L14.83 19.91L15.32 19.51L15.78 19.05L16.2 18.52L16.56 17.92L16.83 17.24L17 16.5L17.06 15.73L16.99 14.96L16.83 14.22L16.59 13.51L16.29 12.86L15.95 12.25L15.58 11.69L15.19 11.17L14.8 10.68L14.4 10.23L14.03 9.82L13.67 9.44L13.34 9.1L13.05 8.81L12.81 8.55L12.6 8.35L12.44 8.2L12.3 8.11L12.06 8.01L11.94 7.97L11.82 7.87L11.71 7.71L11.65 7.46L11.63 7.14L11.67 6.75L11.78 6.31L11.93 5.83L12.12 5.32L12.34 4.78L12.58 4.23L12.82 3.68L13.06 3.11L13.27 2.55L13.45 2L12.95 2.28L12.44 2.55L11.91 2.82L11.37 3.1L10.83 3.38L10.29 3.68L9.76 4.01L9.24 4.36L8.73 4.75L8.25 5.2L7.81 5.71L7.41 6.29L7.09 6.96L6.87 7.7L6.76 8.49L6.78 9.28L6.9 10.06L7.12 10.8L7.41 11.48L7.75 12.11L8.13 12.69L8.53 13.23L8.93 13.73L9.35 14.18L9.75 14.6L10.14 14.99L10.5 15.33L10.83 15.64L11.12 15.91L11.37 16.14L11.58 16.32L11.76 16.45L11.91 16.54L12.05 16.6L12.19 16.66L12.33 16.76L12.46 16.91L12.56 17.14L12.61 17.45L12.6 17.83L12.53 18.26L12.41 18.74L12.24 19.24L12.04 19.78L11.81 20.32L11.57 20.88L11.33 21.44Z" />
+      </svg>
       <div className="hdr-in">
         <div className="brand">
-          <div className="mark"><Star size={17} color="var(--paper)" /></div>
+          <div className="mark"><Thyme size={26} color="#fff" /></div>
           <div>
-            <h1>{isAr ? "بيت السدر" : "Beit Al Sidr"}</h1>
-            <p>{t.tagline}</p>
+            <h1>{isAr ? "ورقة" : "Leaf"}</h1>
           </div>
         </div>
 
@@ -759,9 +805,15 @@ function Header({ t, lang, setLang, isAr, onCall, onBill, showBill }) {
 
 /* ------------------------------ menu card ----------------------------- */
 
-function MenuCard({ item, t, isAr, out, onPick, count = 0 }) {
+function MenuCard({ item, t, isAr, out, onPick, onQuickAdd, count = 0 }) {
   return (
-    <article className={"card" + (out ? " card-out" : "") + (count ? " card-in" : "")}>
+    <article
+      className={"card" + (out ? " card-out" : "") + (count ? " card-in" : "") + (out ? "" : " card-clickable")}
+      onClick={out ? undefined : onPick}
+      role={out ? undefined : "button"}
+      tabIndex={out ? undefined : 0}
+      onKeyDown={out ? undefined : (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onPick(); } }}
+    >
       <div className="card-imgwrap">
         <Dish item={item} className="card-img" />
         {count > 0 && (
@@ -787,7 +839,10 @@ function MenuCard({ item, t, isAr, out, onPick, count = 0 }) {
           {out ? (
             <span className="soldout">{t.sold}</span>
           ) : (
-            <button className={"addbtn" + (count ? " addbtn-on" : "")} onClick={onPick}>
+            <button
+              className={"addbtn" + (count ? " addbtn-on" : "")}
+              onClick={(e) => { e.stopPropagation(); onQuickAdd(); }}
+            >
               {count > 0 ? <span className="addbtn-n">{count}</span> : "+"}
             </button>
           )}
@@ -899,7 +954,7 @@ function ItemSheet({ item, line, t, isAr, onClose, onAdd, onRemove }) {
 
 function CartPanel({
   t, isAr, cart, setQty, onEditLine, total, onClear, onSubmit,
-  rounds, roundStatus, canEdit, editLeft, onEdit, onCancel, onBill, onClose,
+  rounds, roundStatus, canEdit, editLeft, onEdit, onCancel, onConfirm, onBill, onClose,
 }) {
   const STEPS = ["received", "preparing", "ready", "served"];
   return (
@@ -924,7 +979,7 @@ function CartPanel({
               <div className="track">
                 {STEPS.map((s, i) => (
                   <div key={s} className={"node" + (i <= si ? " node-on" : "")}>
-                    <Star size={9} color={i <= si ? "var(--sumac)" : "var(--line-solid)"} />
+                    <Thyme size={9} color={i <= si ? "var(--sumac)" : "var(--line-solid)"} />
                     <span>{t.status[s]}</span>
                   </div>
                 ))}
@@ -956,6 +1011,9 @@ function CartPanel({
                     <button className="mini" onClick={onEdit}>{t.editOrder}</button>
                     <button className="mini mini-danger" onClick={onCancel}>{t.cancelOrder}</button>
                   </div>
+                  <div className="editwin-skip">
+                    <button className="editwin-pay" onClick={onConfirm}>{t.allGood}</button>
+                  </div>
                 </div>
               )}
               {isLast && !canEdit && (
@@ -970,7 +1028,7 @@ function CartPanel({
 
         {cart.length === 0 && rounds.length === 0 && (
           <div className="empty">
-            <Star size={20} color="var(--line-solid)" />
+            <Thyme size={20} color="var(--line-solid)" />
             <b>{t.empty}</b>
             <span>{t.emptyHint}</span>
           </div>
@@ -989,12 +1047,22 @@ function CartPanel({
                 <span className="line-n">{isAr ? it.nameAr : it.name}</span>
                 <span className="line-o">{selLabel(it, l.sel, isAr ? "ar" : "en").join(" · ")}</span>
                 {l.note && <span className="line-note">“{l.note}”</span>}
-                <button className="line-edit" onClick={() => onEditLine(l.lineId)}>
-                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
-                  </svg>
-                  {t.edit}
-                </button>
+                <div className="line-actions">
+                  <button className="line-edit" onClick={() => onEditLine(l.lineId)}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M12 20h9" /><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
+                    </svg>
+                    {t.edit}
+                  </button>
+                  <button className="line-edit line-delete" onClick={() => setQty(l.lineId, 0)} aria-label={t.remove}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M3 6h18" /><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                      <path d="M10 11v6" /><path d="M14 11v6" />
+                    </svg>
+                    {t.remove}
+                  </button>
+                </div>
               </div>
               <span className="line-p">{jd(l.unit * l.qty)}</span>
             </div>
@@ -1026,13 +1094,28 @@ function CartPanel({
 /* -------------------------------- bill -------------------------------- */
 
 const METHODS = [
-  { id: "applepay", name: "Apple Pay", nameAr: "Apple Pay", glyph: "" },
+  { id: "applepay", name: "Apple Pay", nameAr: "Apple Pay", glyph: "apple" },
   { id: "googlepay", name: "Google Pay", nameAr: "Google Pay", glyph: "G" },
-  { id: "card", name: "Visa / Mastercard", nameAr: "فيزا / ماستركارد", glyph: "▮" },
-  { id: "cliq", name: "CliQ transfer", nameAr: "تحويل كليك", glyph: "⇄" },
-  { id: "zaincash", name: "Zain Cash", nameAr: "زين كاش", glyph: "◎" },
+  { id: "card", name: "Visa / Mastercard", nameAr: "فيزا / ماستركارد", glyph: "card" },
   { id: "cash", name: "Cash at the table", nameAr: "نقداً على الطاولة", glyph: "₪" },
 ];
+
+function CardMark({ size = 15 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="var(--ink)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect x="2" y="5" width="20" height="14" rx="2.5" />
+      <path d="M2 10h20" />
+    </svg>
+  );
+}
+
+function AppleMark({ size = 14 }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="#fff" aria-hidden="true">
+      <path d="M16.37 1.43c0 1.14-.49 2.27-1.18 3.08-.74.9-1.99 1.57-2.99 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.57-2.27 1.21-2.98.8-.94 2.14-1.64 3.25-1.68.03.13.05.28.05.43ZM20.93 17.14c-.03.07-.46 1.58-1.52 3.12-.94 1.34-1.93 2.68-3.47 2.71-1.53.03-2.02-.89-3.75-.89-1.73 0-2.27.87-3.72.92-1.5.05-2.64-1.44-3.6-2.78-1.97-2.75-3.47-7.79-1.44-11.19 1-1.67 2.8-2.75 4.7-2.77 1.5-.02 2.85.99 3.74.99.9 0 2.55-1.22 4.28-1.05.75.03 2.85.3 4.19 2.28-.11.06-2.5 1.44-2.47 4.31.03 3.43 3.06 4.57 3.09 4.58Z" />
+    </svg>
+  );
+}
 
 function Bill({
   t, isAr, rounds, subtotal, service, tax, tipAmt, grand,
@@ -1044,7 +1127,7 @@ function Bill({
 
       <div className="billcard">
         <div className="bill-head">
-          <Star size={14} color="var(--sumac)" />
+          <Thyme size={14} color="var(--sumac)" />
           <h2>{t.bill}</h2>
           <p>{t.billFor}</p>
         </div>
@@ -1097,7 +1180,9 @@ function Bill({
                 className={"method" + (payMethod === m.id ? " method-on" : "") + (m.id === "applepay" ? " m-apple" : "") + (m.id === "googlepay" ? " m-google" : "")}
                 onClick={() => setPayMethod(m.id)}
               >
-                <span className="mglyph">{m.glyph}</span>
+                <span className="mglyph">
+                  {m.id === "applepay" ? <AppleMark /> : m.id === "card" ? <CardMark /> : m.glyph}
+                </span>
                 <span>{isAr ? m.nameAr : m.name}</span>
               </button>
             ))}
@@ -1125,7 +1210,7 @@ function Receipt({ t, isAr, receipt, rounds, subtotal, service, tax, tipAmt, gra
     <div className="billwrap">
       <div className="billcard">
         <div className="paid-head">
-          <div className="paid-mark"><Star size={22} color="var(--paper)" /></div>
+          <div className="paid-mark"><Thyme size={22} color="var(--paper)" /></div>
           <h2>{t.thanks}</h2>
           <p>{t.thanksSub}</p>
         </div>
@@ -1179,7 +1264,7 @@ function ChefChat({ t, isAr, lang, onClose, onPick }) {
     setInput("");
     setBusy(true);
 
-    const sys = `You are the kitchen assistant for Beit Al Sidr, a Levantine restaurant on Rainbow Street in Amman, Jordan. A guest is ordering from their table using the QR menu.
+    const sys = `You are the kitchen assistant for Leaf, a Levantine restaurant in Amman, Jordan. A guest is ordering from their table using the QR menu.
 
 MENU (JSON): ${JSON.stringify(compactMenu)}
 
@@ -1241,7 +1326,7 @@ Respond with ONLY a JSON object, no markdown fences, no preamble:
     <div className="ovl ovl-chat" onClick={onClose}>
       <div className="chat" onClick={(e) => e.stopPropagation()}>
         <div className="chat-head">
-          <div className="chat-mark"><Star size={13} color="var(--paper)" /></div>
+          <div className="chat-mark"><Thyme size={13} color="var(--paper)" /></div>
           <div className="chat-title">
             <b>{t.askChef}</b>
             <span>{t.chefSub}</span>
@@ -1294,13 +1379,17 @@ Respond with ONLY a JSON object, no markdown fences, no preamble:
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
 
+html,body{margin:0;padding:0;width:100%;overflow-x:hidden;background:#EDEFE6}
+#root{overflow-x:hidden}
+
 .app{
   --ink:#12403B; --ink2:#0B2C29; --paper:#EDEFE6; --card:#FBFCF7;
   --sumac:#B4442E; --brass:#C98F2B; --olive:#6F7A56;
   --line:rgba(18,64,59,.13); --line-solid:#C6CDBE; --muted:#5C6B62;
-  background:var(--paper); color:var(--ink); min-height:100vh;
+  background:var(--paper); color:var(--ink); min-height:100vh; width:100%;
   font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;
-  -webkit-font-smoothing:antialiased; padding-bottom:90px;
+  -webkit-font-smoothing:antialiased; padding-bottom:90px; overflow-x:hidden;
+  box-sizing:border-box;
 }
 .app *{box-sizing:border-box}
 .app h1,.app h2,.app h3,.app h4{font-family:'Bricolage Grotesque','IBM Plex Sans Arabic',sans-serif;margin:0;letter-spacing:-.02em}
@@ -1310,11 +1399,15 @@ const CSS = `
 .mono{font-family:'IBM Plex Mono',monospace}
 
 /* header */
-.hdr{position:sticky;top:0;z-index:40;background:var(--ink);color:var(--paper);
-  background-image:radial-gradient(circle at 12% 120%,rgba(201,143,43,.28),transparent 42%),radial-gradient(circle at 88% -30%,rgba(180,68,46,.3),transparent 45%)}
-.hdr-in{max-width:1320px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.hdr{position:sticky;top:0;z-index:40;color:#fff;overflow:hidden;
+  background-image:radial-gradient(ellipse 60% 90% at 22% -30%,rgba(255,255,255,.22),transparent 65%),
+    linear-gradient(108deg,#0A4A2A 0%,#146639 40%,#1F8A4E 78%,#2FBE79 105%)}
+.hdr-leaf{position:absolute;top:50%;width:190px;height:190px;fill:#fff;opacity:.14;pointer-events:none}
+.hdr-leaf-end{inset-inline-end:-30px;transform:translateY(-50%) rotate(14deg)}
+.hdr-leaf-start{inset-inline-start:-60px;transform:translateY(-50%) rotate(-8deg) scaleX(-1);opacity:.1}
+.hdr-in{position:relative;z-index:1;max-width:1320px;margin:0 auto;padding:14px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
 .brand{display:flex;align-items:center;gap:11px;margin-inline-end:auto}
-.mark{width:36px;height:36px;border-radius:11px;background:rgba(255,255,255,.11);display:grid;place-items:center;border:1px solid rgba(255,255,255,.18)}
+.mark{width:36px;height:36px;display:grid;place-items:center}
 .brand h1{font-size:19px;font-weight:800}
 .brand p{margin:1px 0 0;font-size:11.5px;opacity:.62;letter-spacing:.02em}
 .hdr-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
@@ -1351,6 +1444,10 @@ const CSS = `
 .card-out:hover{transform:none;box-shadow:none}
 .card-in{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
 .card-imgwrap{position:relative}
+.card-clickable{cursor:pointer}
+.card-clickable:focus-visible{outline:2px solid var(--sumac);outline-offset:2px}
+.card-clickable .dish-wrap img,.card-clickable .dish-fb{transition:transform .25s ease}
+.card-clickable:hover .dish-wrap img,.card-clickable:hover .dish-fb{transform:scale(1.04)}
 .incart{position:absolute;top:9px;inset-inline-start:9px;background:var(--ink);color:var(--paper);
   font-size:10.5px;font-weight:600;letter-spacing:.02em;padding:4px 9px;border-radius:999px;
   display:flex;align-items:center;gap:5px;box-shadow:0 3px 10px rgba(11,44,41,.35)}
@@ -1418,10 +1515,12 @@ const CSS = `
 .line-n{font-size:13.5px;font-weight:600;line-height:1.3}
 .line-o{font-size:11.5px;color:var(--muted);line-height:1.4}
 .line-note{font-size:11.5px;color:var(--sumac);font-style:italic;line-height:1.4}
-.line-edit{display:inline-flex;align-items:center;gap:4px;align-self:flex-start;margin-top:4px;
+.line-actions{display:flex;gap:6px;margin-top:4px}
+.line-edit{display:inline-flex;align-items:center;gap:4px;align-self:flex-start;
   font-size:11px;font-weight:600;color:var(--muted);padding:3px 8px;border-radius:6px;
   border:1px solid var(--line);transition:all .13s}
 .line-edit:hover{color:var(--ink);border-color:var(--ink);background:rgba(18,64,59,.05)}
+.line-delete:hover{color:var(--sumac);border-color:var(--sumac);background:rgba(180,68,46,.07)}
 .editing-note{font-size:11px;font-weight:600;color:var(--brass);background:rgba(201,143,43,.12);
   border:1px solid rgba(201,143,43,.3);padding:6px 10px;border-radius:8px;margin-bottom:10px}
 .removebtn{border-color:rgba(180,68,46,.35);color:var(--sumac);padding:13px 15px;font-size:13px;border-radius:12px}
@@ -1448,10 +1547,14 @@ const CSS = `
 .bar{height:3px;background:rgba(201,143,43,.25);border-radius:99px;overflow:hidden}
 .bar i{display:block;height:100%;background:var(--brass);transition:width .5s linear}
 .editwin-btns{display:flex;gap:6px;margin-top:9px}
-.mini{flex:1;font-size:12px;font-weight:600;padding:7px;border-radius:8px;border:1px solid var(--line);background:var(--card)}
-.mini:hover{border-color:var(--ink)}
+.mini{flex:1;font-size:12px;font-weight:600;padding:7px;border-radius:8px;border:1px solid var(--line);background:var(--card);transition:all .13s}
+.mini:hover{border-color:var(--brass);background:rgba(201,143,43,.14)}
 .mini-danger{color:var(--sumac);border-color:rgba(180,68,46,.35)}
 .mini-danger:hover{background:rgba(180,68,46,.07);border-color:var(--sumac)}
+.editwin-skip{margin-top:10px;padding-top:10px;border-top:1px dashed rgba(201,143,43,.35)}
+.editwin-pay{width:100%;padding:8px;border-radius:8px;font-size:12.5px;font-weight:700;
+  border:1.5px solid #1FA35C;background:transparent;color:#178A52;transition:all .13s}
+.editwin-pay:hover{background:#1FA35C;color:#fff}
 .lockedbox{margin:8px 16px 10px;padding:9px 11px;border-radius:11px;background:rgba(18,64,59,.05);display:flex;flex-direction:column;gap:2px}
 .lockedbox b{font-size:12px}
 .lockedbox span{font-size:11.5px;color:var(--muted)}

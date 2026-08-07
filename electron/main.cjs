@@ -10,7 +10,7 @@ function createWindow() {
     minWidth: 380,
     minHeight: 640,
     backgroundColor: "#EDEFE6",
-    title: "Beit Al Sidr — Ordering",
+    title: "Leaf — Ordering",
     icon: path.join(__dirname, "..", "public", "icons", "icon-512.png"),
     webPreferences: {
       contextIsolation: true,

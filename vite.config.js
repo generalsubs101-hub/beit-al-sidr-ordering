@@ -10,9 +10,9 @@ export default defineConfig({
       registerType: "autoUpdate",
       includeAssets: ["icons/apple-touch-icon.png"],
       manifest: {
-        name: "Beit Al Sidr — Ordering",
-        short_name: "Beit Al Sidr",
-        description: "Levantine kitchen table-side ordering — Rainbow Street, Amman",
+        name: "Leaf — Ordering",
+        short_name: "Leaf",
+        description: "Levantine kitchen table-side ordering",
         start_url: ".",
         display: "standalone",
         background_color: "#EDEFE6",
