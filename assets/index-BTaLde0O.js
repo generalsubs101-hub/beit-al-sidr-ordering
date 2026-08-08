@@ -56,8 +56,10 @@ Respond with ONLY a JSON object, no markdown fences, no preamble:
 `);let x;try{x=JSON.parse(f.replace(/```json|```/g,"").trim())}catch{x={reply:f,suggest:[],feasible:null}}o(S=>[...S,{role:"assistant",text:x.reply||f,suggest:(x.suggest||[]).filter(j=>tn.some(_=>_.id===j)),feasible:x.feasible}])}catch{o(c=>[...c,{role:"assistant",text:n?"ما قدرت أوصل للمطبخ هلأ. جرّب مرة ثانية أو نادِ النادل.":"I couldn't reach the kitchen just now. Try again, or call a waiter.",suggest:[]}])}finally{g(!1)}};return s.jsx("div",{className:"ovl ovl-chat",onClick:r,children:s.jsxs("div",{className:"chat",onClick:v=>v.stopPropagation(),children:[s.jsxs("div",{className:"chat-head",children:[s.jsx("div",{className:"chat-mark",children:s.jsx(rn,{size:13,color:"var(--paper)"})}),s.jsxs("div",{className:"chat-title",children:[s.jsx("b",{children:e.askChef}),s.jsx("span",{children:e.chefSub})]}),s.jsx("button",{className:"sheet-x",onClick:r,"aria-label":e.close,children:"×"})]}),s.jsxs("div",{className:"chat-body",children:[i.map((v,y)=>s.jsxs("div",{className:"bub bub-"+v.role,children:[s.jsx("p",{children:v.text}),v.feasible===!0&&s.jsxs("span",{className:"feas feas-y",children:["✓ ",n?"المطبخ يقدر يعملها":"The kitchen can do this"]}),v.feasible===!1&&s.jsxs("span",{className:"feas feas-n",children:["✕ ",n?"المطبخ ما بيقدر يعملها":"The kitchen can't do this"]}),v.suggest&&v.suggest.length>0&&s.jsxs("div",{className:"sugg",children:[s.jsx("span",{className:"sugg-l",children:e.suggested}),v.suggest.map(L=>{const d=tn.find(c=>c.id===L);return s.jsxs("button",{className:"suggb",onClick:()=>l(L),children:[s.jsx("span",{children:d.emoji}),s.jsx("span",{children:n?d.nameAr:d.name}),s.jsx("b",{children:q(d.price)})]},L)})]})]},y)),p&&s.jsxs("div",{className:"bub bub-assistant bub-wait",children:[s.jsx("i",{}),s.jsx("i",{}),s.jsx("i",{}),s.jsx("span",{children:e.thinking})]}),s.jsx("div",{ref:h})]}),s.jsxs("div",{className:"chat-foot",children:[s.jsx("input",{value:a,placeholder:e.chatPh,onChange:v=>u(v.target.value),onKeyDown:v=>{v.key==="Enter"&&w()}}),s.jsx("button",{className:"primary",onClick:w,disabled:p||!a.trim(),children:"↑"})]})]})})}const Sf=`
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
 
-html,body{margin:0;padding:0;width:100%;overflow-x:hidden;background:#EDEFE6}
-#root{overflow-x:hidden}
+/* overflow-x:clip (not hidden) — hidden would make these scroll containers and
+   break position:sticky for the cart panel */
+html,body{margin:0;padding:0;width:100%;overflow-x:clip;background:#EDEFE6}
+#root{overflow-x:clip}
 
 .app{
   --ink:#12403B; --ink2:#0B2C29; --paper:#EDEFE6; --card:#FBFCF7;
@@ -65,7 +67,7 @@ html,body{margin:0;padding:0;width:100%;overflow-x:hidden;background:#EDEFE6}
   --line:rgba(18,64,59,.13); --line-solid:#C6CDBE; --muted:#5C6B62;
   background:var(--paper); color:var(--ink); min-height:100vh; width:100%;
   font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;
-  -webkit-font-smoothing:antialiased; padding-bottom:90px; overflow-x:hidden;
+  -webkit-font-smoothing:antialiased; padding-bottom:90px; overflow-x:clip;
   box-sizing:border-box;
 }
 .app *{box-sizing:border-box}
@@ -104,7 +106,8 @@ html,body{margin:0;padding:0;width:100%;overflow-x:hidden;background:#EDEFE6}
 .chip-on{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:600}
 
 /* shell */
-.shell{max-width:1320px;margin:0 auto;padding:26px 20px 40px;display:grid;grid-template-columns:1fr 372px;gap:30px;align-items:start}
+.shell{max-width:1320px;margin:0 auto;padding:26px 20px 40px;display:grid;grid-template-columns:1fr 372px;gap:30px}
+.menu{align-self:start}
 @media(max-width:1000px){.shell{grid-template-columns:1fr;padding:20px 16px 40px}}
 
 /* categories */
@@ -163,14 +166,15 @@ html,body{margin:0;padding:0;width:100%;overflow-x:hidden;background:#EDEFE6}
 .foot p{margin:0;font-size:11.5px;color:var(--muted);line-height:1.5}
 
 /* cart */
-.cart{position:sticky;top:124px}
+/* top matches the cart's at-rest offset (header 64 + catbar 57 + shell pad 26)
+   so it doesn't visibly jump when it starts sticking */
+.cart-in{position:sticky;top:147px;background:var(--card);border:1px solid var(--line);border-radius:18px;display:flex;flex-direction:column;max-height:calc(100vh - 175px);overflow:hidden}
 @media(max-width:1000px){
   .cart{position:fixed;inset:0;z-index:60;background:rgba(11,44,41,.5);display:none;top:0}
   .cart-open{display:block}
   .cart-in{position:absolute;bottom:0;left:0;right:0;max-height:88vh;border-radius:20px 20px 0 0}
   .cart-x{display:block !important}
 }
-.cart-in{background:var(--card);border:1px solid var(--line);border-radius:18px;display:flex;flex-direction:column;max-height:calc(100vh - 150px);overflow:hidden}
 .cart-head{padding:15px 17px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
 .cart-head h2{font-size:16px;font-weight:700}
 .cart-x{display:none;font-size:26px;line-height:1;color:var(--muted)}
