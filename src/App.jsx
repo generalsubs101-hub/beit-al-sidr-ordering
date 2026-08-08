@@ -1379,8 +1379,10 @@ Respond with ONLY a JSON object, no markdown fences, no preamble:
 const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
 
-html,body{margin:0;padding:0;width:100%;overflow-x:hidden;background:#EDEFE6}
-#root{overflow-x:hidden}
+/* overflow-x:clip (not hidden) — hidden would make these scroll containers and
+   break position:sticky for the cart panel */
+html,body{margin:0;padding:0;width:100%;overflow-x:clip;background:#EDEFE6}
+#root{overflow-x:clip}
 
 .app{
   --ink:#12403B; --ink2:#0B2C29; --paper:#EDEFE6; --card:#FBFCF7;
@@ -1388,7 +1390,7 @@ html,body{margin:0;padding:0;width:100%;overflow-x:hidden;background:#EDEFE6}
   --line:rgba(18,64,59,.13); --line-solid:#C6CDBE; --muted:#5C6B62;
   background:var(--paper); color:var(--ink); min-height:100vh; width:100%;
   font-family:'IBM Plex Sans Arabic',system-ui,sans-serif;
-  -webkit-font-smoothing:antialiased; padding-bottom:90px; overflow-x:hidden;
+  -webkit-font-smoothing:antialiased; padding-bottom:90px; overflow-x:clip;
   box-sizing:border-box;
 }
 .app *{box-sizing:border-box}
@@ -1427,7 +1429,8 @@ html,body{margin:0;padding:0;width:100%;overflow-x:hidden;background:#EDEFE6}
 .chip-on{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:600}
 
 /* shell */
-.shell{max-width:1320px;margin:0 auto;padding:26px 20px 40px;display:grid;grid-template-columns:1fr 372px;gap:30px;align-items:start}
+.shell{max-width:1320px;margin:0 auto;padding:26px 20px 40px;display:grid;grid-template-columns:1fr 372px;gap:30px}
+.menu{align-self:start}
 @media(max-width:1000px){.shell{grid-template-columns:1fr;padding:20px 16px 40px}}
 
 /* categories */
@@ -1486,14 +1489,15 @@ html,body{margin:0;padding:0;width:100%;overflow-x:hidden;background:#EDEFE6}
 .foot p{margin:0;font-size:11.5px;color:var(--muted);line-height:1.5}
 
 /* cart */
-.cart{position:sticky;top:124px}
+/* top matches the cart's at-rest offset (header 64 + catbar 57 + shell pad 26)
+   so it doesn't visibly jump when it starts sticking */
+.cart-in{position:sticky;top:147px;background:var(--card);border:1px solid var(--line);border-radius:18px;display:flex;flex-direction:column;max-height:calc(100vh - 175px);overflow:hidden}
 @media(max-width:1000px){
   .cart{position:fixed;inset:0;z-index:60;background:rgba(11,44,41,.5);display:none;top:0}
   .cart-open{display:block}
   .cart-in{position:absolute;bottom:0;left:0;right:0;max-height:88vh;border-radius:20px 20px 0 0}
   .cart-x{display:block !important}
 }
-.cart-in{background:var(--card);border:1px solid var(--line);border-radius:18px;display:flex;flex-direction:column;max-height:calc(100vh - 150px);overflow:hidden}
 .cart-head{padding:15px 17px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
 .cart-head h2{font-size:16px;font-weight:700}
 .cart-x{display:none;font-size:26px;line-height:1;color:var(--muted)}
