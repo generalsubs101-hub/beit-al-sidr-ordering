@@ -488,6 +488,52 @@ export default function App() {
     return () => clearTimeout(i);
   }, [toast]);
 
+  /* lock the page behind the mobile cart sheet. html (not body) carries the
+     lock because our CSS sets overflow-x on html, which stops body's overflow
+     from propagating to the viewport */
+  useEffect(() => {
+    if (!mobileCart) return;
+    const root = document.documentElement;
+    const prev = root.style.overflow;
+    root.style.overflow = "hidden";
+    return () => { root.style.overflow = prev; };
+  }, [mobileCart]);
+
+  /* The phone's back gesture should peel off whatever is open rather than
+     leaving the site. Every open layer owns one history entry: opening pushes
+     one, back consumes one, and closing from the UI rewinds the one it added
+     (skipPopRef swallows the popstate that rewind triggers). */
+  const overlayDepth =
+    (chatOpen ? 1 : 0) + (sheet ? 1 : 0) + (mobileCart ? 1 : 0) + (view === "bill" ? 1 : 0);
+  const depthRef = useRef(0);
+  const skipPopRef = useRef(0);
+
+  useEffect(() => {
+    const onPop = () => {
+      if (skipPopRef.current > 0) { skipPopRef.current -= 1; return; }
+      if (depthRef.current === 0) return;      // nothing of ours open: let the browser leave
+      depthRef.current -= 1;
+      if (chatOpen) setChatOpen(false);        // close the topmost layer first
+      else if (sheet) setSheet(null);
+      else if (mobileCart) setMobileCart(false);
+      else if (view === "bill") setView("menu");
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, [chatOpen, sheet, mobileCart, view]);
+
+  useEffect(() => {
+    const prev = depthRef.current;
+    if (overlayDepth > prev) {
+      for (let i = prev; i < overlayDepth; i++) window.history.pushState({ leafLayer: i + 1 }, "");
+      depthRef.current = overlayDepth;
+    } else if (overlayDepth < prev) {
+      depthRef.current = overlayDepth;
+      skipPopRef.current += 1;
+      window.history.go(overlayDepth - prev);
+    }
+  }, [overlayDepth]);
+
   /* scroll spy */
   useEffect(() => {
     const el = menuRef.current;
@@ -528,6 +574,10 @@ export default function App() {
     );
 
   const cartTotal = cart.reduce((s, l) => s + l.unit * l.qty, 0);
+  const cartCount = cart.reduce((s, l) => s + l.qty, 0);
+  /* the phone order bar only exists once something is ordered; the chef button
+     tucks into the corner when it isn't there and lifts clear when it is */
+  const showMobar = view === "menu" && (cart.length > 0 || rounds.length > 0);
 
   /* how many of each dish are sitting in the cart right now */
   const counts = useMemo(() => {
@@ -696,7 +746,10 @@ export default function App() {
               </footer>
             </section>
 
-            <aside className={"cart" + (mobileCart ? " cart-open" : "")}>
+            <aside
+              className={"cart" + (mobileCart ? " cart-open" : "")}
+              onClick={(e) => { if (e.target === e.currentTarget) setMobileCart(false); }}
+            >
               <CartPanel
                 t={t} isAr={isAr} cart={cart} setQty={setQty} onEditLine={editLine} total={cartTotal}
                 onClear={() => { setCart([]); setToast({ kind: "warn", msg: t.cartCleared }); }}
@@ -729,15 +782,25 @@ export default function App() {
       </main>
 
       {/* mobile cart bar */}
-      {view === "menu" && (cart.length > 0 || rounds.length > 0) && (
+      {showMobar && (
         <button className="mobar" onClick={() => setMobileCart(true)}>
-          <span className="mobar-n">{cart.reduce((s, l) => s + l.qty, 0)}</span>
+          {cartCount > 0
+            ? <span className="mobar-n">{cartCount}</span>
+            : <Thyme size={15} color="var(--paper)" />}
           <span>{t.yourOrder}</span>
-          <span className="mobar-p">{jd(cartTotal)} JD</span>
+          <span className="mobar-p">
+            {cartCount > 0
+              ? `${jd(cartTotal)} JD`
+              : lastRound && t.status[roundStatus(lastRound)]}
+          </span>
         </button>
       )}
 
-      <button className="chef-fab" onClick={() => setChatOpen(true)} aria-label={t.askChef}>
+      <button
+        className={"chef-fab" + (showMobar ? " chef-fab-raised" : "")}
+        onClick={() => setChatOpen(true)}
+        aria-label={t.askChef}
+      >
         <Thyme size={13} color="var(--paper)" />
         <span>{t.askChef}</span>
       </button>
@@ -763,7 +826,11 @@ export default function App() {
         />
       )}
 
-      {toast && <div className={"toast toast-" + toast.kind}>{toast.msg}</div>}
+      {toast && (
+        <div className={"toast toast-" + toast.kind + (showMobar ? " toast-raised" : "")}>
+          {toast.msg}
+        </div>
+      )}
     </div>
   );
 }
@@ -959,6 +1026,7 @@ function CartPanel({
   const STEPS = ["received", "preparing", "ready", "served"];
   return (
     <div className="cart-in">
+      <span className="sheet-grab" aria-hidden="true" />
       <div className="cart-head">
         <h2>{t.yourOrder}</h2>
         <button className="cart-x" onClick={onClose} aria-label={t.close}>×</button>
@@ -1396,7 +1464,10 @@ html,body{margin:0;padding:0;width:100%;overflow-x:clip;background:#EDEFE6}
 .app *{box-sizing:border-box}
 .app h1,.app h2,.app h3,.app h4{font-family:'Bricolage Grotesque','IBM Plex Sans Arabic',sans-serif;margin:0;letter-spacing:-.02em}
 .app[dir="rtl"] h1,.app[dir="rtl"] h2,.app[dir="rtl"] h3,.app[dir="rtl"] h4{font-family:'IBM Plex Sans Arabic',sans-serif}
-.app button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+/* :where() drops the button part to zero specificity, so this stays a plain
+   reset instead of out-weighing every component rule below it (.primary,
+   .mobar, .chef-fab, .addbtn, …) and stripping their background/colour */
+.app :where(button){font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
 .app button:focus-visible,.app input:focus-visible,.app textarea:focus-visible{outline:2px solid var(--sumac);outline-offset:2px}
 .mono{font-family:'IBM Plex Mono',monospace}
 
@@ -1430,7 +1501,9 @@ html,body{margin:0;padding:0;width:100%;overflow-x:clip;background:#EDEFE6}
 
 /* shell */
 .shell{max-width:1320px;margin:0 auto;padding:26px 20px 40px;display:grid;grid-template-columns:1fr 372px;gap:30px}
-.menu{align-self:start}
+/* min-width:0 lets the 1fr track shrink below its content width, so the phone
+   card rails can actually scroll instead of stretching the column */
+.menu{align-self:start;min-width:0}
 @media(max-width:1000px){.shell{grid-template-columns:1fr;padding:20px 16px 40px}}
 
 /* categories */
@@ -1501,6 +1574,7 @@ html,body{margin:0;padding:0;width:100%;overflow-x:clip;background:#EDEFE6}
 .cart-head{padding:15px 17px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between}
 .cart-head h2{font-size:16px;font-weight:700}
 .cart-x{display:none;font-size:26px;line-height:1;color:var(--muted)}
+.sheet-grab{display:none}
 .cart-scroll{overflow-y:auto;padding:8px 0;flex:1;min-height:120px}
 
 .empty{padding:44px 24px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:7px}
@@ -1593,7 +1667,11 @@ html,body{margin:0;padding:0;width:100%;overflow-x:clip;background:#EDEFE6}
   border-radius:999px;padding:12px 18px;display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:600;
   box-shadow:0 8px 24px rgba(180,68,46,.35);transition:transform .15s}
 .chef-fab:hover{transform:translateY(-2px)}
-@media(max-width:1000px){.chef-fab{bottom:78px;padding:11px 15px;font-size:12.5px}}
+@media(max-width:1000px){
+  .chef-fab{bottom:calc(14px + env(safe-area-inset-bottom));inset-inline-end:14px;
+    padding:11px 15px;font-size:12.5px;transition:bottom .18s ease}
+  .chef-fab-raised{bottom:calc(78px + env(safe-area-inset-bottom))} /* clear the order bar */
+}
 
 /* overlay + sheet */
 .ovl{position:fixed;inset:0;z-index:70;background:rgba(11,44,41,.55);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:20px;animation:fade .18s ease}
@@ -1721,10 +1799,59 @@ html,body{margin:0;padding:0;width:100%;overflow-x:clip;background:#EDEFE6}
 
 /* toast */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:90;background:var(--ink);color:var(--paper);
-  padding:11px 20px;border-radius:999px;font-size:13px;font-weight:600;box-shadow:0 8px 26px rgba(11,44,41,.3);animation:pop .2s ease}
+  padding:11px 20px;border-radius:999px;font-size:13px;font-weight:600;box-shadow:0 8px 26px rgba(11,44,41,.3);animation:pop .2s ease;
+  max-width:min(90vw,420px);text-align:center;line-height:1.45}
 .toast-warn{background:var(--sumac)}
 @keyframes pop{from{transform:translate(-50%,10px);opacity:0}to{transform:translate(-50%,0);opacity:1}}
+@keyframes popFlat{from{transform:translateY(10px);opacity:0}to{transform:none;opacity:1}}
 @media(max-width:1000px){.toast{bottom:140px}}
+
+/* ---------------------- phone layout ----------------------
+   Categories stay stacked vertically; the dishes inside each one
+   become a horizontal swipe rail of compact cards, and the cart
+   reads as a proper bottom sheet.                            */
+@media(max-width:700px){
+  .cat{margin-bottom:26px}
+  .cat-head{margin-bottom:11px;gap:8px}
+  .cat-head h2{font-size:18px}
+
+  .grid{
+    display:flex;gap:10px;
+    overflow-x:auto;overscroll-behavior-x:contain;
+    scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;
+    margin-inline:-16px;padding:2px 16px 6px; /* bleed past .shell padding to the screen edge */
+  }
+  .grid::-webkit-scrollbar{display:none}
+  .card{flex:0 0 165px;scroll-snap-align:start;border-radius:14px}
+  .card:hover{transform:none;box-shadow:0 1px 2px rgba(18,64,59,.05)}
+
+  .card-body{padding:10px 11px 11px;gap:5px}
+  .card-top{gap:5px}
+  .card-top h3{font-size:13.5px}
+  .card-alt{font-size:10.5px}
+  .card-desc{font-size:11px;line-height:1.45;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .tags{gap:4px}
+  .tag{font-size:9px;padding:2px 5px;white-space:nowrap}
+  .price{font-size:15px}
+  .price i{font-size:10px}
+  .addbtn{width:30px;height:30px;font-size:18px;border-radius:9px}
+  .incart{top:7px;inset-inline-start:7px;font-size:9.5px;padding:3px 7px}
+
+  .cart-in{max-height:86dvh;border-radius:22px 22px 0 0;box-shadow:0 -14px 40px rgba(11,44,41,.28)}
+  .sheet-grab{display:block;width:38px;height:4px;border-radius:99px;
+    background:var(--line-solid);margin:9px auto 0;flex-shrink:0}
+  .cart-head{padding:8px 16px 12px}
+  .cart-foot{padding-bottom:calc(13px + env(safe-area-inset-bottom))}
+  .mobar{bottom:calc(14px + env(safe-area-inset-bottom))}
+
+  /* a pill only suits one short line; on a phone the message wraps, so it
+     becomes an edge-to-edge banner sitting clear of the chef button + order bar */
+  .toast{left:14px;right:14px;transform:none;max-width:none;
+    border-radius:14px;padding:12px 16px;font-size:12.5px;
+    bottom:calc(64px + env(safe-area-inset-bottom));animation:popFlat .2s ease}
+  .toast-raised{bottom:calc(128px + env(safe-area-inset-bottom))}
+}
 
 @media(prefers-reduced-motion:reduce){.app *{animation:none !important;transition:none !important}}
 `;
